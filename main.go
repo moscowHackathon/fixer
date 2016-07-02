@@ -5,9 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
-
 	"flag"
-
 	"github.com/nlopes/slack"
 )
 
@@ -37,7 +35,6 @@ func main() {
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
-Loop:
 	for {
 		select {
 		case msg := <-rtm.IncomingEvents:
@@ -47,8 +44,8 @@ Loop:
 			// Ignore hello
 
 			case *slack.ConnectedEvent:
-				fmt.Println("Infos:", ev.Info)
-				fmt.Println("Connection counter:", ev.ConnectionCount)
+				//fmt.Println("Infos:", ev.Info)
+				//fmt.Println("Connection counter:", ev.ConnectionCount)
 				// Replace #general with your Channel ID
 				rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "C1NBBSKEE"))
 
@@ -61,17 +58,17 @@ Loop:
 				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак", ev.Channel))
 
 			case *slack.PresenceChangeEvent:
-				fmt.Printf("Presence Change: %v\n", ev)
+				//fmt.Printf("Presence Change: %v\n", ev)
 
 			case *slack.LatencyReport:
-				fmt.Printf("Current latency: %v\n", ev.Value)
+				//fmt.Printf("Current latency: %v\n", ev.Value)
 
 			case *slack.RTMError:
 				fmt.Printf("\033[0;31mError:\033[0m %s\n", ev.Error())
 
 			case *slack.InvalidAuthEvent:
-				fmt.Printf("Invalid credentials")
-				break Loop
+				fmt.Printf("\033[0;31mInvalid credentials\033[0m")
+				os.Exit(2)
 
 			default:
 
