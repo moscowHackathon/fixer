@@ -7,4 +7,4 @@ Slack client to communication consumers with arkon
 	go get github.com/moskowHackathon/fixer
 
 ## Run
-	$GOPATH/bin/fixer
+	$GOPATH/bin/fixer --slack-token=YOUR-TOKEN-IN-SLACK
