@@ -1,11 +1,5 @@
 package main
 
-//xoxb-56428768433-fN8VtM2I37IID43IRa8S6d3q
-
-//go run main.go --slack-token=xoxb-56428768433-fN8VtM2I37IID43IRa8S6d3q - новый
-
-//go run main.go --slack-token=xoxb-56367029334-s3iS3gCHo0lsE8bMNkwrsmr5
-
 import (
 	"flag"
 	"fmt"
@@ -128,6 +122,26 @@ func main() {
 				//	ChanId:      "1",
 				//}
 				response, _ = service.Start(channelID)
+
+				fmt.Println(" >>> ============================== Start ")
+				fmt.Println(response)
+				fmt.Println("<<<  ============================== Start ")
+
+				fmt.Println(" >>>> ============================== Question ")
+				response, _ = service.Question(channelID)
+				fmt.Println(" <<<< ============================== Question ")
+
+				fmt.Println(" >>>> ============================== Complite ")
+				response, _ = service.Complete(channelID)
+				fmt.Println(" <<<<< ============================== Complite ")
+
+				fmt.Println(" >>>>> ============================== Answer ")
+				response, _ = service.Answer(channelID, "-1")
+				fmt.Println(" <<<<< ============================== Answer ")
+
+				fmt.Println(response)
+
+
 				fmt.Println(" <<<<<<<<<<<<<<<<<<<<")
 				if channelID != ev.Channel {
 					_,_, channelID, err = rtm.OpenIMChannel(ev.User)

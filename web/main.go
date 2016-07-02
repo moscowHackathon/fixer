@@ -7,6 +7,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"github.com/moscowHackathon/fixer/service"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
