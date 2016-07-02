@@ -1,0 +1,4 @@
+package: github.com/moscowhackathon/fixer
+import:
+- package: github.com/101nl/slack
+  version: feature/slack-buttons

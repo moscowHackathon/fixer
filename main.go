@@ -1,14 +1,16 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
-	"strings"
-	"flag"
-	"github.com/nlopes/slack"
-	"github.com/moskowHackathon/fixer/service"
 	"strconv"
+	"strings"
+
+	"github.com/101nl/slack"
+	"github.com/kr/pretty"
+	"github.com/moscowHackathon/fixer/service"
 )
 
 func main() {
@@ -23,7 +25,7 @@ func main() {
 	api := slack.New(*token)
 	logger := log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)
 	slack.SetLogger(logger)
-	//api.SetDebug(true)
+	api.SetDebug(true)
 
 	// Find the user to post as.
 	authTest, err := api.AuthTest()
@@ -33,6 +35,8 @@ func main() {
 	}
 
 	botID := authTest.UserID
+
+	pretty.Println("botID", botID)
 
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
@@ -49,15 +53,40 @@ func main() {
 				//fmt.Println("Infos:", ev.Info)
 				//fmt.Println("Connection counter:", ev.ConnectionCount)
 				// Replace #general with your Channel ID
-				rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "C1NBBSKEE"))
+				//rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "C1NBBSKEE"))
 
 			case *slack.MessageEvent:
 				fmt.Printf("Message: %+v\n", ev)
+				if strings.HasPrefix(ev.Channel, "D") {
+					if ev.User != "U1NBH3ZG9" {
+						break
+					}
+					msg := slack.NewPostMessageParameters()
+					msg.Attachments = []slack.Attachment{
+						slack.Attachment{
+							Text: "test atext",
+							Actions: []slack.AttachmentAction{
+								slack.AttachmentAction{
+									Name:  "chess",
+									Text:  "Chess",
+									Type:  "button",
+									Value: "chess",
+								},
+								slack.AttachmentAction{
+									Name:  "maze",
+									Text:  "maze",
+									Type:  "button",
+									Value: "maze",
+								},
+							},
+							CallbackID: "123",
+						},
+					}
+					api.PostMessage(ev.Channel /*"C1NBBSKEE"*/, "test", msg)
+				}
 				if strings.Contains(ev.Text, "<@"+botID+">") == false {
 					break
-
 				}
-
 
 				params := slack.NewPostMessageParameters()
 
@@ -79,24 +108,23 @@ func main() {
 
 				responseChannel, responseTime, err := rtm.PostMessage("C1NBBSKEE", "Текст !!!", params)
 
-				fmt.Println( "CHANNNNNELLL >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" )
+				fmt.Println("CHANNNNNELLL >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 				fmt.Println(responseChannel)
 				fmt.Println(responseTime)
 				fmt.Println(err)
-				fmt.Println( "CHANNNNNELLL <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" )
+				fmt.Println("CHANNNNNELLL <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
+				//=======================================================================================================
 
-//=======================================================================================================
-
-				fmt.Println( " >>>>>>>>>>>>>>>>>>>>")
+				fmt.Println(" >>>>>>>>>>>>>>>>>>>>")
 				request := service.GetRequest{
-					ChanId: "1",
+					ChanId:      "1",
 					UserMessage: "HI ALL!!!",
 				}
 				response, _ := service.SendMessage(request)
-				fmt.Println( " <<<<<<<<<<<<<<<<<<<<")
+				fmt.Println(" <<<<<<<<<<<<<<<<<<<<")
 
-				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - " + strconv.Itoa(int(response.ID)), ev.Channel))
+				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - "+strconv.Itoa(int(response.ID)), ev.Channel))
 
 			case *slack.PresenceChangeEvent:
 				fmt.Printf("Presence Change: %v\n", ev)
@@ -114,7 +142,7 @@ func main() {
 			default:
 
 				// Ignore other events..
-				 fmt.Printf("Unexpected: %v\n", msg.Data)
+				pretty.Println("Unexpected:", msg.Data)
 			}
 		}
 	}
