@@ -2,6 +2,34 @@ package service
 
 import "github.com/101nl/slack"
 
+func GenerateMessageForSlack2(textMessage string) slack.Attachment {
+	result := slack.Attachment{
+		Text: textMessage,
+		Actions: []slack.AttachmentAction{
+			slack.AttachmentAction{
+				Name:  "yes",
+				Text:  "да",
+				Type:  "button",
+				Value: "yes",
+			},
+			slack.AttachmentAction{
+				Name:  "no",
+				Text:  "нет",
+				Type:  "button",
+				Value: "maze",
+			},
+			slack.AttachmentAction{
+				Name:  "unknown",
+				Text:  "хз",
+				Type:  "button",
+				Value: "unknown",
+			},
+		},
+		CallbackID: "123",
+	}
+	return result
+}
+
 func GenerateMessageForSlack(textMessage string) slack.Attachment {
 	result := slack.Attachment{
 		Text:       "Choose a game to play",

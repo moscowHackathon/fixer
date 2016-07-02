@@ -61,90 +61,38 @@ func main() {
 					if ev.BotID != "" {
 						break
 					}
-					msg := slack.NewPostMessageParameters()
-					msg.Attachments = []slack.Attachment{
-						slack.Attachment{
-							Text: "test atext",
-							Actions: []slack.AttachmentAction{
-								slack.AttachmentAction{
-									Name:  "chess",
-									Text:  "Chess",
-									Type:  "button",
-									Value: "chess",
-								},
-								slack.AttachmentAction{
-									Name:  "maze",
-									Text:  "maze",
-									Type:  "button",
-									Value: "maze",
-								},
-							},
-							CallbackID: "123",
-						},
-					}
-					api.PostMessage(ev.Channel /*"C1NBBSKEE"*/, "test", msg)
 				}
+
+				//Игнорим сообщения, не предназначеные боту
 				if strings.Contains(ev.Text, "<@"+botID+">") == false {
 					break
 				}
 
-				params := slack.NewPostMessageParameters()
-
-				//attachment := slack.Attachment{
-				//	Pretext: "some pretext",
-				//	Text:    "some text",
-				//	// Uncomment the following part to send a field too
-				//	Fields: []slack.AttachmentField{
-				//		slack.AttachmentField{
-				//			Title: "a",
-				//			Value: "no",
-				//		},
-				//	},
-				//}
-
-				attachment := service.GenerateMessageForSlack("qwe")
-
-				params.Attachments = []slack.Attachment{attachment}
-
-				responseChannel, responseTime, err := rtm.PostMessage("C1NBBSKEE", "Текст !!!", params)
-
-				fmt.Println("CHANNNNNELLL >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-				fmt.Println(responseChannel)
-				fmt.Println(responseTime)
-				fmt.Println(err)
-				fmt.Println("CHANNNNNELLL <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-
-				//=======================================================================================================
-
-				fmt.Println(" >>>>>>>>>>>>>>>>>>>>")
-				//request := service.GetRequestAll{
-				//	ChanId:      "1",
-				//}
-				response, _ = service.Start(channelID)
-
-				fmt.Println(" >>> ============================== Start ")
-				fmt.Println(response)
-				fmt.Println("<<<  ============================== Start ")
-
-				fmt.Println(" >>>> ============================== Question ")
-				response, _ = service.Question(channelID)
-				fmt.Println(" <<<< ============================== Question ")
-
-				fmt.Println(" >>>> ============================== Complite ")
-				response, _ = service.Complete(channelID)
-				fmt.Println(" <<<<< ============================== Complite ")
-
-				fmt.Println(" >>>>> ============================== Answer ")
-				response, _ = service.Answer(channelID, "-1")
-				fmt.Println(" <<<<< ============================== Answer ")
-
-				fmt.Println(response)
-
-				fmt.Println(" <<<<<<<<<<<<<<<<<<<<")
+				// Если мы не в приватном канале - послать приглашение
 				if channelID != ev.Channel {
 					_, _, channelID, err = rtm.OpenIMChannel(ev.User)
 					rtm.InviteUserToChannel(channelID, ev.User)
 					response, _ = service.Start(channelID)
+					fmt.Println(" >>> ============================== Start ")
+					fmt.Println(response)
+					fmt.Println("<<<  ============================== Start ")
+
+
+					//TODO: А вот тут уже отрисуем кнопочки? или не тут?!
+					atachment2 := service.GenerateMessageForSlack2("А вот тут будет текст вопроса",)
+					msg := slack.NewPostMessageParameters()
+					msg.Attachments = []slack.Attachment{atachment2}
+					rtm.PostMessage(ev.Channel /*"C1NBBSKEE"*/, "Тут будет заголовок окна", msg)
+
+/*
+				params := slack.NewPostMessageParameters()
+				attachment := service.GenerateMessageForSlack("qwe")
+				params.Attachments = []slack.Attachment{attachment}
+				//responseChannel, responseTime, err := rtm.PostMessage(channelID, "Текст !!!", params)
+				rtm.PostMessage(channelID, "Текст !!!", params)
+				//chan id = C1NBBSKEE
+
+ */
 				}
 
 				//=======================================================================================================
@@ -172,13 +120,3 @@ func main() {
 	}
 }
 
-/*
-	//
-	//params := slack.NewPostMessageParameters()
-	//
-	//attachment := service.GenerateMessageForSlack("Плашечка мля")
-	//
-	//params.Attachments = []slack.Attachment{attachment}
-	//
-	//_, _, err = rtm.PostMessage("C1NBBSKEE", "Текст !!!", params)
-*/
