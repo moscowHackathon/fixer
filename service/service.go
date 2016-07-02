@@ -22,17 +22,26 @@ type fixerService struct {
 
 
 type IFixerService interface {
-	Start(req GetRequest) (GetResponse, error)
+	Start(GetRequestAll) (GetResponse, error)
+	Question(GetRequestAll) (GetResponse, error)
+	Answer(GetRequestAnswer) (GetResponse, error)
+	Complete(GetRequestAll) (GetResponse, error)
 }
 
-type GetRequest struct {
-	ChanId      string  `json:"chan_id"`
+type GetRequestAll struct {
+	ChanId      string  `json:"id"`
+}
+
+type GetRequestAnswer struct {
+	ChanId      string  `json:"id"`
 	UserMessage string  `json:"user_message"`
 }
 
 type GetResponse struct {
 	//nextQuestion string `json:"user_message"`
-	ID int64 `json:"ID"`
+	ID string `json:"id"`
+	Message string `json:"message"`
+	Error string `json:"error"`
 }
 
 
@@ -90,10 +99,34 @@ func ClearBody(body io.ReadCloser) {
 	body.Close()
 }
 
-func (this fixerService)Start(request GetRequest) (GetResponse, error) {
+func (this fixerService)Start(request GetRequestAll) (GetResponse, error) {
 	response := GetResponse{}
 
-	err := this.restCall("GET", this.baseUrl + "/start", request, &response)
+	err := this.restCall("GET", this.baseUrl + "/start/" + request.ChanId, nil, &response)
+
+	return response, err
+}
+
+func (this fixerService)Question(request GetRequestAll) (GetResponse, error) {
+	response := GetResponse{}
+
+	err := this.restCall("GET", this.baseUrl + "/question/" + request.ChanId, nil , &response)
+
+	return response, err
+}
+
+func (this fixerService)Complete(request GetRequestAll) (GetResponse, error) {
+	response := GetResponse{}
+
+	err := this.restCall("GET", this.baseUrl + "/complete/" + request.ChanId, nil , &response)
+
+	return response, err
+}
+
+func (this fixerService)Answer(request GetRequestAnswer) (GetResponse, error) {
+	response := GetResponse{}
+
+	err := this.restCall("POST", this.baseUrl + "/answer", request , &response)
 
 	return response, err
 }

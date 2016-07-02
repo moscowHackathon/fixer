@@ -1,17 +1,25 @@
 package main
 
+//xoxb-56428768433-fN8VtM2I37IID43IRa8S6d3q
+
+//go run main.go --slack-token=xoxb-56428768433-fN8VtM2I37IID43IRa8S6d3q - новый
+
+//go run main.go --slack-token=xoxb-56367029334-s3iS3gCHo0lsE8bMNkwrsmr5
+
 import (
 	"flag"
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/101nl/slack"
 	"github.com/kr/pretty"
 	"github.com/moscowHackathon/fixer/service"
 )
+
+var channelID string
+var response service.GetResponse
 
 func main() {
 	token := flag.String("slack-token", "", "Token from slack")
@@ -41,6 +49,7 @@ func main() {
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
+
 	for {
 		select {
 		case msg := <-rtm.IncomingEvents:
@@ -50,8 +59,6 @@ func main() {
 			// Ignore hello
 
 			case *slack.ConnectedEvent:
-				//fmt.Println("Infos:", ev.Info)
-				//fmt.Println("Connection counter:", ev.ConnectionCount)
 				// Replace #general with your Channel ID
 				//rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "C1NBBSKEE"))
 
@@ -117,14 +124,20 @@ func main() {
 				//=======================================================================================================
 
 				fmt.Println(" >>>>>>>>>>>>>>>>>>>>")
-				request := service.GetRequest{
-					ChanId:      "1",
-					UserMessage: "HI ALL!!!",
-				}
-				response, _ := service.SendMessage(request)
+				//request := service.GetRequestAll{
+				//	ChanId:      "1",
+				//}
+				response, _ = service.Start(channelID)
 				fmt.Println(" <<<<<<<<<<<<<<<<<<<<")
+				if channelID != ev.Channel {
+					_,_, channelID, err = rtm.OpenIMChannel(ev.User)
+					rtm.InviteUserToChannel(channelID, ev.User)
+					response, _ = service.Start(channelID)
+				}
 
-				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - "+strconv.Itoa(int(response.ID)), ev.Channel))
+				//=======================================================================================================
+				//				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - " + strconv.Itoa(int(response.ID)), channelID))
+				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - " + response.ID, channelID))
 
 			case *slack.PresenceChangeEvent:
 				fmt.Printf("Presence Change: %v\n", ev)
@@ -140,10 +153,20 @@ func main() {
 				os.Exit(2)
 
 			default:
-
 				// Ignore other events..
 				pretty.Println("Unexpected:", msg.Data)
 			}
 		}
 	}
 }
+
+/*
+				//
+				//params := slack.NewPostMessageParameters()
+				//
+				//attachment := service.GenerateMessageForSlack("Плашечка мля")
+				//
+				//params.Attachments = []slack.Attachment{attachment}
+				//
+				//_, _, err = rtm.PostMessage("C1NBBSKEE", "Текст !!!", params)
+ */
