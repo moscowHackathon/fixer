@@ -58,9 +58,6 @@ func main() {
 			case *slack.MessageEvent:
 				fmt.Printf("Message: %+v\n", ev)
 				if strings.HasPrefix(ev.Channel, "D") {
-					if ev.User != "U1NBH3ZG9" {
-						break
-					}
 					msg := slack.NewPostMessageParameters()
 					msg.Attachments = []slack.Attachment{
 						slack.Attachment{
