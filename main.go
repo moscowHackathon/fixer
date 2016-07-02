@@ -7,6 +7,8 @@ import (
 	"strings"
 	"flag"
 	"github.com/nlopes/slack"
+	"github.com/moskowHackathon/fixer/service"
+	"strconv"
 )
 
 func main() {
@@ -55,13 +57,52 @@ func main() {
 					break
 
 				}
-				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак", ev.Channel))
+
+
+				params := slack.NewPostMessageParameters()
+
+				//attachment := slack.Attachment{
+				//	Pretext: "some pretext",
+				//	Text:    "some text",
+				//	// Uncomment the following part to send a field too
+				//	Fields: []slack.AttachmentField{
+				//		slack.AttachmentField{
+				//			Title: "a",
+				//			Value: "no",
+				//		},
+				//	},
+				//}
+
+				attachment := service.GenerateMessageForSlack("qwe")
+
+				params.Attachments = []slack.Attachment{attachment}
+
+				responseChannel, responseTime, err := rtm.PostMessage("C1NBBSKEE", "Текст !!!", params)
+
+				fmt.Println( "CHANNNNNELLL >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" )
+				fmt.Println(responseChannel)
+				fmt.Println(responseTime)
+				fmt.Println(err)
+				fmt.Println( "CHANNNNNELLL <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" )
+
+
+//=======================================================================================================
+
+				fmt.Println( " >>>>>>>>>>>>>>>>>>>>")
+				request := service.GetRequest{
+					ChanId: "1",
+					UserMessage: "HI ALL!!!",
+				}
+				response, _ := service.SendMessage(request)
+				fmt.Println( " <<<<<<<<<<<<<<<<<<<<")
+
+				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - " + strconv.Itoa(int(response.ID)), ev.Channel))
 
 			case *slack.PresenceChangeEvent:
-				//fmt.Printf("Presence Change: %v\n", ev)
+				fmt.Printf("Presence Change: %v\n", ev)
 
 			case *slack.LatencyReport:
-				//fmt.Printf("Current latency: %v\n", ev.Value)
+				fmt.Printf("Current latency: %v\n", ev.Value)
 
 			case *slack.RTMError:
 				fmt.Printf("\033[0;31mError:\033[0m %s\n", ev.Error())
@@ -73,7 +114,7 @@ func main() {
 			default:
 
 				// Ignore other events..
-				// fmt.Printf("Unexpected: %v\n", msg.Data)
+				 fmt.Printf("Unexpected: %v\n", msg.Data)
 			}
 		}
 	}
