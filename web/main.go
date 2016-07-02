@@ -1,28 +1,37 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"os"
-	"github.com/moscowHackathon/fixer/service"
+
+	"strconv"
+
+	"github.com/moscowHackathon/fixer/slackrequest"
 )
 
+var responses = map[string]uint64{}
+
 func handler(w http.ResponseWriter, r *http.Request) {
-	buf, err := httputil.DumpRequest(r, true)
+	payload := r.PostFormValue("payload")
+	data := &slackrequest.Payload{}
+	err := json.Unmarshal([]byte(payload), data)
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "ERROR: %s", err)
+		fmt.Fprintf(os.Stderr, "Can't unmarshal json: %s", err)
+	}
+	responses[data.User.ID]++
+	message := data.OriginalMessage
+	message.Text = "Question #" + strconv.FormatUint(responses[data.User.ID], 10)
+	message.Attachments[0].CallbackID = message.Text
+	response, err := json.Marshal(message)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
-	params, err := url.ParseQuery(string(buf))
-	if err != nil {
-		fmt.Fprintf(os.Stdout, "ERROR parsing: %s", err)
-		return
-	}
-	playload := params.Get("playload")
-	fmt.Fprint(os.Stdout, playload)
+	w.Write(response)
 }
 
 func main() {

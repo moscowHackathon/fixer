@@ -43,7 +43,6 @@ func main() {
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
-
 	for {
 		select {
 		case msg := <-rtm.IncomingEvents:
@@ -141,17 +140,16 @@ func main() {
 
 				fmt.Println(response)
 
-
 				fmt.Println(" <<<<<<<<<<<<<<<<<<<<")
 				if channelID != ev.Channel {
-					_,_, channelID, err = rtm.OpenIMChannel(ev.User)
+					_, _, channelID, err = rtm.OpenIMChannel(ev.User)
 					rtm.InviteUserToChannel(channelID, ev.User)
 					response, _ = service.Start(channelID)
 				}
 
 				//=======================================================================================================
 				//				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - " + strconv.Itoa(int(response.ID)), channelID))
-				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - " + response.ID, channelID))
+				rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - "+response.ID, channelID))
 
 			case *slack.PresenceChangeEvent:
 				fmt.Printf("Presence Change: %v\n", ev)
@@ -175,12 +173,12 @@ func main() {
 }
 
 /*
-				//
-				//params := slack.NewPostMessageParameters()
-				//
-				//attachment := service.GenerateMessageForSlack("Плашечка мля")
-				//
-				//params.Attachments = []slack.Attachment{attachment}
-				//
-				//_, _, err = rtm.PostMessage("C1NBBSKEE", "Текст !!!", params)
- */
+	//
+	//params := slack.NewPostMessageParameters()
+	//
+	//attachment := service.GenerateMessageForSlack("Плашечка мля")
+	//
+	//params.Attachments = []slack.Attachment{attachment}
+	//
+	//_, _, err = rtm.PostMessage("C1NBBSKEE", "Текст !!!", params)
+*/
