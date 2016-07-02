@@ -20,8 +20,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(os.Stdout, "ERROR parsing: %s", err)
 		return
 	}
-	params.Get("playload")
-	fmt.Fprint(os.Stdout, string(buf))
+	playload := params.Get("playload")
+	fmt.Fprint(os.Stdout, playload)
 }
 
 func main() {
