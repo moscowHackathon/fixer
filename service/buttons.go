@@ -1,6 +1,6 @@
 package service
 
-import "github.com/101nl/slack"
+import "github.com/moscowHackathon/slack"
 
 func GenerateMessageForSlack2(textMessage string) slack.Attachment {
 	result := slack.Attachment{

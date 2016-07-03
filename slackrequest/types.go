@@ -1,6 +1,6 @@
 package slackrequest
 
-import "github.com/101nl/slack"
+import "github.com/moscowHackathon/slack"
 
 // Payload Action URL invocation payload
 type Payload struct {

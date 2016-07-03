@@ -7,9 +7,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/101nl/slack"
 	"github.com/kr/pretty"
+	"github.com/moscowHackathon/fixer/callback"
 	"github.com/moscowHackathon/fixer/service"
+	"github.com/moscowHackathon/slack"
 )
 
 var channelID string
@@ -17,6 +18,8 @@ var response service.GetResponse
 
 func main() {
 	token := flag.String("slack-token", "", "Token from slack")
+	cert := flag.String("cert", "", "Path to SSL cert file")
+	key := flag.String("key", "", "Path to SSL key file")
 	flag.Parse()
 
 	if token == nil || *token == "" {
@@ -43,6 +46,11 @@ func main() {
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
+	if cert != nil && *cert != "" && key != nil && *key != "" {
+		callback.API = api
+		go callback.Run(*cert, *key)
+	}
+
 	for {
 		select {
 		case msg := <-rtm.IncomingEvents:
@@ -58,9 +66,34 @@ func main() {
 			case *slack.MessageEvent:
 				fmt.Printf("Message: %+v\n", ev)
 				if strings.HasPrefix(ev.Channel, "D") {
-					if ev.BotID != "" {
+					if ev.BotID != "" || ev.SubType == "bot_message" || ev.SubType == "message_changed" {
 						break
 					}
+					if len(ev.Attachments) == 1 && ev.Attachments[0].CallbackID != "" {
+						break
+					}
+					msg := slack.NewPostMessageParameters()
+					msg.Attachments = []slack.Attachment{
+						slack.Attachment{
+							Text: "test atext",
+							Actions: []slack.AttachmentAction{
+								slack.AttachmentAction{
+									Name:  "chess",
+									Text:  "Chess",
+									Type:  "button",
+									Value: "chess",
+								},
+								slack.AttachmentAction{
+									Name:  "maze",
+									Text:  "maze",
+									Type:  "button",
+									Value: "maze",
+								},
+							},
+							CallbackID: "123",
+						},
+					}
+					api.PostMessage(ev.Channel /*"C1NBBSKEE"*/, "test", msg)
 				}
 
 				//Игнорим сообщения, не предназначеные боту
@@ -77,22 +110,21 @@ func main() {
 					fmt.Println(response)
 					fmt.Println("<<<  ============================== Start ")
 
-
 					//TODO: А вот тут уже отрисуем кнопочки? или не тут?!
-					atachment2 := service.GenerateMessageForSlack2("А вот тут будет текст вопроса",)
+					atachment2 := service.GenerateMessageForSlack2("А вот тут будет текст вопроса")
 					msg := slack.NewPostMessageParameters()
 					msg.Attachments = []slack.Attachment{atachment2}
 					rtm.PostMessage(ev.Channel /*"C1NBBSKEE"*/, "Тут будет заголовок окна", msg)
 
-/*
-				params := slack.NewPostMessageParameters()
-				attachment := service.GenerateMessageForSlack("qwe")
-				params.Attachments = []slack.Attachment{attachment}
-				//responseChannel, responseTime, err := rtm.PostMessage(channelID, "Текст !!!", params)
-				rtm.PostMessage(channelID, "Текст !!!", params)
-				//chan id = C1NBBSKEE
+					/*
+						params := slack.NewPostMessageParameters()
+						attachment := service.GenerateMessageForSlack("qwe")
+						params.Attachments = []slack.Attachment{attachment}
+						//responseChannel, responseTime, err := rtm.PostMessage(channelID, "Текст !!!", params)
+						rtm.PostMessage(channelID, "Текст !!!", params)
+						//chan id = C1NBBSKEE
 
- */
+					*/
 				}
 
 				//=======================================================================================================
@@ -119,4 +151,3 @@ func main() {
 		}
 	}
 }
-
