@@ -2,7 +2,8 @@ package service
 
 import "github.com/moscowHackathon/slack"
 
-func GenerateMessageForSlack2(textMessage string) slack.Attachment {
+// GenerateMessageForSlack2 generates attachement with buttons
+func GenerateMessageForSlack2(textMessage, id string) slack.Attachment {
 	result := slack.Attachment{
 		Text: textMessage,
 		Actions: []slack.AttachmentAction{
@@ -10,26 +11,27 @@ func GenerateMessageForSlack2(textMessage string) slack.Attachment {
 				Name:  "yes",
 				Text:  "да",
 				Type:  "button",
-				Value: "yes",
+				Value: "1",
 			},
 			slack.AttachmentAction{
 				Name:  "no",
 				Text:  "нет",
 				Type:  "button",
-				Value: "maze",
+				Value: "-1",
 			},
 			slack.AttachmentAction{
 				Name:  "unknown",
 				Text:  "хз",
 				Type:  "button",
-				Value: "unknown",
+				Value: "0",
 			},
 		},
-		CallbackID: "123",
+		CallbackID: id,
 	}
 	return result
 }
 
+// GenerateMessageForSlack ??
 func GenerateMessageForSlack(textMessage string) slack.Attachment {
 	result := slack.Attachment{
 		Text:       "Choose a game to play",
