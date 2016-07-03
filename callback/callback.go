@@ -82,7 +82,7 @@ func HandleStart(w http.ResponseWriter, r *http.Request) {
 	}
 	params := slack.NewPostMessageParameters()
 	params.Attachments = []slack.Attachment{service.GenerateMessageForSlack2(response.Message, response.ID)}
-	_, _, err = API.PostMessage(channelID, userName, params)
+	_, _, err = API.PostMessage(channelID, "Hello, "+userName+"!", params)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte(err.Error()))
