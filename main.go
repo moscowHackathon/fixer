@@ -77,6 +77,12 @@ func main() {
 					}
 
 					if textDebug {
+
+						if strings.Contains(ev.Text, "complete") == true {
+							rtm.SendMessage(rtm.NewOutgoingMessage("Компонент определен. Это - '" + ev.Text + "'", channelID))
+							break
+						}
+
 						response, _ = service.Answer(channelID, ev.Text)
 						rtm.SendMessage(rtm.NewOutgoingMessage("Ты ответил: " + ev.Text, channelID))
 
