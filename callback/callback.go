@@ -5,17 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
+	"strings"
 
-	"github.com/kr/pretty"
 	"github.com/moscowHackathon/fixer/service"
 	"github.com/moscowHackathon/fixer/slackrequest"
 	"github.com/moscowHackathon/slack"
 )
 
 var (
-	responses = map[string]uint64{}
-
 	// API slack web API
 	API *slack.Client
 )
@@ -28,16 +25,36 @@ func HandleHome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Can't unmarshal json: %s", err)
 	}
-	responses[data.User.ID]++
+	answer := data.Actions[0].Value
+	response, err := service.Answer(data.Channel.ID, answer)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	if strings.Contains(response.Message, "complete") == true {
+		w.Write([]byte(response.Message))
+		return
+	}
+	response, err = service.Question(data.Channel.ID)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	message := data.OriginalMessage
-	message.Text = "So, " + data.Actions[0].Name + ". The next question is #" + strconv.FormatUint(responses[data.User.ID], 10)
-	message.Attachments[0].CallbackID = message.Text
-	message.BotID = "asdasd"
+	message.Text = "So, " + data.Actions[0].Name
+	message.Attachments[0].CallbackID = response.ID
+	message.Attachments[0].Text = response.Message
 	if API == nil {
 		return
 	}
-	a, b, c, d := API.UpdateMessage(data.Channel.ID, data.MessageTS, message.Text, message.Attachments)
-	pretty.Println(a, b, c, d)
+	_, _, _, err = API.UpdateMessage(data.Channel.ID, data.MessageTS, message.Text, message.Attachments)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
 }
 
 // HandleStart handle slack slash command /fix requests
@@ -52,6 +69,12 @@ func HandleStart(w http.ResponseWriter, r *http.Request) {
 	}
 	API.InviteUserToChannel(channelID, userID)
 	response, err := service.Start(channelID)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	response, err = service.Question(channelID)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte(err.Error()))
