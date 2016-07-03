@@ -17,7 +17,6 @@ var channelID string
 var response service.GetResponse
 var textDebug = true
 
-
 func main() {
 	token := flag.String("slack-token", "", "Token from slack")
 	cert := flag.String("cert", "", "Path to SSL cert file")
@@ -79,15 +78,15 @@ func main() {
 					if textDebug {
 
 						if strings.Contains(ev.Text, "complete") == true {
-							rtm.SendMessage(rtm.NewOutgoingMessage("Компонент определен. Это - '" + ev.Text + "'", channelID))
+							rtm.SendMessage(rtm.NewOutgoingMessage("Компонент определен. Это - '"+ev.Text+"'", channelID))
 							break
 						}
 
 						response, _ = service.Answer(channelID, ev.Text)
-						rtm.SendMessage(rtm.NewOutgoingMessage("Ты ответил: " + ev.Text, channelID))
+						rtm.SendMessage(rtm.NewOutgoingMessage("Ты ответил: "+ev.Text, channelID))
 
 						response, _ = service.Question(channelID)
-						rtm.SendMessage(rtm.NewOutgoingMessage("Вот тебе вопрос: '" + response.Message  + "'. Варианты ответов : 1,0,-1", channelID))
+						rtm.SendMessage(rtm.NewOutgoingMessage("Вот тебе вопрос: '"+response.Message+"'. Варианты ответов : 1,0,-1", channelID))
 
 						break
 					}
@@ -105,22 +104,19 @@ func main() {
 					rtm.InviteUserToChannel(channelID, ev.User)
 					response, _ = service.Start(channelID)
 
-
 					if textDebug {
 						response, _ = service.Question(channelID)
-						rtm.SendMessage(rtm.NewOutgoingMessage("Вот тебе вопрос: '" + response.Message  + "'. Варианты ответов : 1,0,-1", channelID))
+						rtm.SendMessage(rtm.NewOutgoingMessage("Вот тебе вопрос: '"+response.Message+"'. Варианты ответов : 1,0,-1", channelID))
 						break
 					}
 
 					//Рисуем кнопочки в привате
-					atachment2 := service.GenerateMessageForSlack2("А вот тут будет текст вопроса")
+					atachment2 := service.GenerateMessageForSlack2("А вот тут будет текст вопроса", "id")
 					msg := slack.NewPostMessageParameters()
 					msg.Attachments = []slack.Attachment{atachment2}
 					rtm.SendMessage(rtm.NewOutgoingMessage("Привет пользователь - "+response.ID, channelID))
 					rtm.PostMessage(channelID /*"C1NBBSKEE"*/, "Тут будет заголовок окна", msg)
 				}
-
-
 
 				//=======================================================================================================
 				//rtm.SendMessage(rtm.NewOutgoingMessage("Сам дурак. Ответ эксперта - " + strconv.Itoa(int(response.ID)), channelID))
