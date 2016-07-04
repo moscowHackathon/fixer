@@ -9,4 +9,4 @@ Slack client to communication consumers with arkon
 	cd $GOPATH/src/github.com/moscowHackathon/fixer && glide install
 
 ## Run
-	$GOPATH/bin/fixer --slack-token=YOUR-TOKEN-IN-SLACK
+	$GOPATH/bin/fixer --slack-token=YOUR-TOKEN-IN-SLACK --cert=/cert/fullchain.pem --key=/cert/privkey.pem
