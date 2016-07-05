@@ -33,7 +33,7 @@ func HandleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.Contains(response.Message, "complete") == true {
-		w.Write([]byte(response.Message))
+		w.Write([]byte(strings.Replace(response.Message, "complete ", "And the winner is - ", -1)))
 		return
 	}
 	response, err = service.Question(data.Channel.ID)

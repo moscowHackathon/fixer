@@ -6,9 +6,11 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"fmt"
 )
 
-const ContentTypeJSON = "application/json"
+const ContentTypeFormData = "application/x-www-form-urlencoded"
 
 type HttpTransporter interface {
 	Do(*http.Request) (*http.Response, error)
@@ -49,17 +51,22 @@ func NewClient(baseUrl string, transport HttpTransporter) (IFixerService, error)
 
 ////RESTCall rest call
 func (this fixerService) restCall(method, urlStr string, request interface{}, response interface{}) error {
+	var body string
+	var ok bool
+	if nil == request {
+		body = ""
+	} else {
+		body, ok = request.(string)
+		if !ok {
+			return fmt.Errorf("Wrong request: %#v", request)
+		}
+	}
 
-	body, err := json.Marshal(request)
+	httpReq, err := http.NewRequest(method, urlStr, bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return err
 	}
-
-	httpReq, err := http.NewRequest(method, urlStr, bytes.NewBuffer(body))
-	if err != nil {
-		return err
-	}
-	httpReq.Header.Set("Content-Type", ContentTypeJSON)
+	httpReq.Header.Set("Content-Type", ContentTypeFormData)
 	httpReq.Header.Set("Accept-Encoding", "identity")
 
 	httpResp, err := this.transport.Do(httpReq)
@@ -122,7 +129,7 @@ func (this fixerService) Complete(request GetRequestAll) (GetResponse, error) {
 func (this fixerService) Answer(request GetRequestAnswer) (GetResponse, error) {
 	response := GetResponse{}
 
-	err := this.restCall("POST", this.baseUrl+"/answer/"+request.ChanId+"/", request.Answer, &response)
+	err := this.restCall("POST", this.baseUrl+"/answer/"+request.ChanId+"/", "answer="+request.Answer, &response)
 
 	return response, err
 }
